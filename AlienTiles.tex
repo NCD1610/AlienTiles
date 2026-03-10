@@ -1,0 +1,161 @@
+\section{Thuật toán SAT tìm trạng thái Alien Tiles khó nhất}
+
+Trong phần này, chúng tôi trình bày phương pháp giải bài toán
+Alien Tiles bằng cách sử dụng bộ giải SAT kết hợp với các ràng buộc
+Pseudo-Boolean.
+
+Mục tiêu của thuật toán là tìm trạng thái mục tiêu của bảng
+$c$ màu kích thước $n \times n$ sao cho số lần bấm tối thiểu
+để tạo ra trạng thái đó là lớn nhất.
+
+\subsection{Ý tưởng}
+
+Thuật toán hoạt động theo hai bước chính:
+
+\begin{itemize}
+\item Sinh các trạng thái mục tiêu có tổng số lần bấm bằng $k$.
+\item Kiểm tra xem trạng thái đó có thể được tạo ra với ít hơn $k$
+lần bấm hay không.
+\end{itemize}
+
+Nếu số lần bấm tối thiểu đúng bằng $k$, trạng thái đó là hợp lệ.
+
+Thuật toán sẽ tăng dần $k$ cho đến khi không còn trạng thái nào
+thỏa mãn.
+
+\subsection{Biến sử dụng}
+
+\begin{itemize}
+\item $x_{i,j,k}$: biến Boolean biểu diễn ô $(i,j)$ được bấm
+đúng $k$ lần.
+\item $s_{i,j,m}$: biến Boolean biểu diễn màu cuối cùng của ô
+$(i,j)$ là $m$.
+\end{itemize}
+
+Với mỗi ô ta có ràng buộc:
+
+\[
+\sum_{k=0}^{c-1} x_{i,j,k} = 1
+\]
+
+đảm bảo mỗi ô chỉ có một số lần bấm.
+
+Tương tự:
+
+\[
+\sum_{m=0}^{c-1} s_{i,j,m} = 1
+\]
+
+đảm bảo mỗi ô chỉ có một màu cuối cùng.
+
+\subsection{Ràng buộc ảnh hưởng}
+
+Khi bấm ô $(i,j)$, tất cả các ô cùng hàng và cùng cột sẽ
+tăng giá trị thêm $1$ (mod $c$).
+
+Tổng ảnh hưởng lên ô $(i,j)$ được tính như sau:
+
+\[
+S_{i,j} =
+\sum_{col=1}^{n} x_{i,col}
++
+\sum_{row=1}^{n} x_{row,j}
+-
+x_{i,j}
+\]
+
+Giá trị màu của ô phải thỏa mãn:
+
+\[
+S_{i,j} \bmod c = t_{i,j}
+\]
+
+Ràng buộc này được mã hóa bằng các ràng buộc
+Pseudo-Boolean cho tất cả các giá trị tổng có thể.
+
+\subsection{Ràng buộc tổng số lần bấm}
+
+Tổng số lần bấm trên toàn bộ bảng được cố định:
+
+\[
+\sum_{i=1}^{n} \sum_{j=1}^{n} x_{i,j} = k
+\]
+
+trong đó $k$ là số lần bấm đang được kiểm tra.
+
+\subsection{Thuật toán tìm trạng thái khó nhất}
+
+\begin{algorithm}
+\caption{Tìm trạng thái Alien Tiles khó nhất}
+\begin{algorithmic}[1]
+
+\State $k \gets 1$
+\State $best \gets$ None
+
+\While{còn tồn tại nghiệm}
+
+    \State Sinh mô hình SAT với tổng số lần bấm bằng $k$
+
+    \If{không tồn tại nghiệm}
+        \State \textbf{dừng}
+    \EndIf
+
+    \State Lấy trạng thái mục tiêu $T$ từ nghiệm SAT
+
+    \State Tính số lần bấm tối thiểu $k_{min}$ để tạo ra $T$
+
+    \If{$k_{min} = k$}
+        \State $best \gets T$
+    \EndIf
+
+    \State $k \gets k + 1$
+
+\EndWhile
+
+\State Trả về giá trị $k-1$
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Tìm số lần bấm tối thiểu}
+
+Với một trạng thái mục tiêu cố định $T$, số lần bấm tối thiểu
+được tìm bằng cách lặp:
+
+\begin{enumerate}
+
+\item Giải bài toán SAT để tìm một nghiệm.
+
+\item Tính tổng số lần bấm từ nghiệm.
+
+\item Thêm ràng buộc:
+
+\[
+\sum x_{i,j} \le k - 1
+\]
+
+\item Giải lại bài toán.
+
+\end{enumerate}
+
+Quá trình lặp lại cho đến khi công thức trở nên
+không thỏa mãn. Giá trị $k$ cuối cùng chính là
+số lần bấm tối thiểu.
+
+\subsection{Độ phức tạp}
+
+Với bảng kích thước $n \times n$ và $c$ màu:
+
+\begin{itemize}
+
+\item Số biến bấm: $O(n^2 c)$
+
+\item Số biến màu: $O(n^2 c)$
+
+\item Số ràng buộc Pseudo-Boolean: $O(n^2)$
+
+\end{itemize}
+
+Thuật toán cần giải nhiều bài toán SAT nên
+thời gian chạy phụ thuộc mạnh vào kích thước bảng
+và số màu.
