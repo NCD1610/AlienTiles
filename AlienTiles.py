@@ -2,7 +2,7 @@ from pysat.solvers import Gluecard4
 from pysat.formula import IDPool
 from pysat.pb import PBEnc
 
-def find_min_k_manual_maxsat(n, c, target_colors):
+def find_min_k(n, c, target_colors):
     
     v = IDPool()
     solver = Gluecard4()
@@ -121,7 +121,7 @@ def solve_alien_general(n, c, k_target):
                         break
         
        # tìm k min với s
-        k_min = find_min_k_manual_maxsat(n, c, current_colors)
+        k_min = find_min_k(n, c, current_colors)
 
         if(k_min == k_target):
             return s
